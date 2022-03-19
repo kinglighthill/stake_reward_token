@@ -11,12 +11,14 @@ require('dotenv').config()
 
 var bigInt = require("big-integer");
 
-
 // Constants
 const TWITTER_HANDLE = 'kingholyhill';
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
 
-const CONTRACT_ADDRESS = "0x822644cA01bdB8158291f3039237686b191CEc0b"
+// const CONTRACT_ADDRESS = "0x822644cA01bdB8158291f3039237686b191CEc0b"
+
+const CONTRACT_ADDRESS = "0xD5401aCeE1FA35dbfc9C5074a013652774c48A89"
+
 const TOKEN_SYMBOL = "SRT"
 
 let ethereum
@@ -181,7 +183,7 @@ const App = () => {
       const decimals = await stakeRewardContract.decimals()
       const tokens = bigInt(parseInt(transferValue) * 10 ** decimals)
       const transfered = await stakeRewardContract.transfer(transferAddress, tokens.value)
-      
+
       if (transfered === true) {
         await getBalance()
       }
@@ -257,7 +259,7 @@ const App = () => {
 
     window.addEventListener('load', onLoad)
     return () => window.removeEventListener('load', onLoad)
-  }, [])
+  })
 
   return (
     <div className="App">

@@ -34,8 +34,9 @@ contract StakeRewardToken is ERC20, Ownable {
 
     function stakeToken(uint256 _stake) public returns(bool) {
         uint256 stake = convertToDecimals(_stake);
-        _transfer(msg.sender, owner(), stake);
-        _approve(owner(), msg.sender, stake);
+        // _transfer(msg.sender, owner(), stake);
+        // _approve(owner(), msg.sender, stake);
+        _burn(msg.sender, stake);
         if (stakes[msg.sender] == 0) {
             addStakeHolder(msg.sender);
         }
