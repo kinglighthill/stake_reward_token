@@ -178,15 +178,14 @@ const App = () => {
         alert(`You don't have up to ${transferValue} ${TOKEN_SYMBOL} in your wallet. You can buy more tokens`)
       }
 
-
-      // 0x449266b65783538bc1A4fFC1C1583d1A0F92048e
-
-
       const decimals = await stakeRewardContract.decimals()
-      const transfered = await stakeRewardContract.transfer(transferAddress, BigInt(parseInt(transferValue) * 10 ** decimals()))
+      const tokens = bigInt(parseInt(transferValue) * 10 ** decimals)
+      const transfered = await stakeRewardContract.transfer(transferAddress, tokens.value)
+      
       if (transfered === true) {
         await getBalance()
       }
+
     } catch(error) {
       console.error(error)
     }
