@@ -2,7 +2,6 @@ import twitterLogo from './assets/twitter-logo.svg';
 import './App.css';
 
 import contractJson from "./abi.json"
-// import kp from "./keypair.json"
 
 import React, { useEffect, useState } from "react"
 
