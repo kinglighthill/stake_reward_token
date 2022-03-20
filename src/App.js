@@ -15,9 +15,7 @@ var bigInt = require("big-integer");
 const TWITTER_HANDLE = 'kingholyhill';
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
 
-// const CONTRACT_ADDRESS = "0x822644cA01bdB8158291f3039237686b191CEc0b"
-
-const CONTRACT_ADDRESS = "0xD5401aCeE1FA35dbfc9C5074a013652774c48A89"
+const CONTRACT_ADDRESS = "0xCC98c007501c415384974c4df92F1ba8498e29f0"
 
 const TOKEN_SYMBOL = "SRT"
 
@@ -96,8 +94,6 @@ const App = () => {
     const signer = await getSigner()
     stakeRewardContract = new ethers.Contract(CONTRACT_ADDRESS, contractJson.abi, signer)
 
-    console.log("Contract: ", stakeRewardContract)
-
     await fetchData()
   }
 
@@ -147,7 +143,10 @@ const App = () => {
         alert(`You don't have up to ${stakeValue} ${TOKEN_SYMBOL} in your wallet. You can buy more tokens`)
       }
 
-      const staked = await stakeRewardContract.stakeToken(parseInt(stakeValue))
+
+      const options = { gasLimit: 1000000 }
+      const staked = await stakeRewardContract.stakeToken(parseInt(stakeValue), options)
+
       if (staked === true) {
         await getStakedToken()
         await getTotalStakedTokens()
@@ -164,7 +163,7 @@ const App = () => {
 
       alert(`You will be charged ${tokenInEther} ethers plus additional gas fees for this transaction`)
 
-      const options = {value: ethers.utils.parseEther(tokenInEther.toString())}
+      const options = { value: ethers.utils.parseEther(tokenInEther.toString()) }
       const bought = await stakeRewardContract.buyToken(options)
       if (bought === true) {
         await getBalance()
@@ -230,7 +229,7 @@ const App = () => {
           stakeToken()
         }}>
           <input type="text" placeholder="Tokens" value={stakeValue} onChange={ (event) => onInputChange(event, "stake") } />
-          <button type="submit" className="cta-button submit-button">Stake</button>
+          <button type="submit" className="form-button submit-button">Stake</button>
         </form>
         <form onSubmit={(event) => {
           event.preventDefault()
@@ -238,7 +237,7 @@ const App = () => {
         }}>
           <label>1000 {TOKEN_SYMBOL} per ether</label>
           <input type="text" placeholder="Tokens" value={buyValue} onChange={ (event) => onInputChange(event, "buy") } />
-          <button type="submit" className="cta-button submit-button">Buy</button>
+          <button type="submit" className="form-button submit-button">Buy</button>
         </form>
         <form onSubmit={(event) => {
           event.preventDefault()
@@ -246,7 +245,7 @@ const App = () => {
         }}>
           <input type="text" placeholder="Tokens" value={transferValue} onChange={ (event) => onInputChange(event, "transfer") } />
           <input type="text" placeholder="Address" value={transferAddress} onChange={ (event) => onInputChange(event, "address") } />
-          <button type="submit" className="cta-button submit-button">Transfer</button>
+          <button type="submit" className="form-button submit-button">Transfer</button>
         </form>
       </div>
     )
