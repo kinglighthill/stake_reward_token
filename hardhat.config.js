@@ -4,7 +4,7 @@ require("@nomiclabs/hardhat-etherscan");
 
 require('dotenv').config()
 
-const { API_URL, PRIVATE_KEY, ETHERSCAN_KEY } = process.env
+const { API_URL, PRIVATE_KEY, ETHERSCAN_API_KEY } = process.env
 
 
 // You need to export an object to set up your config
@@ -24,6 +24,9 @@ module.exports = {
     }
   },
   etherscan: {
-    apiKey: `${ETHERSCAN_KEY}`
+    apiKey: `${ETHERSCAN_API_KEY}`
+  },
+  paths: {
+    artifacts: "./src/artifacts",
   }
 };

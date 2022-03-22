@@ -6,21 +6,23 @@ async function main() {
     const StakeRewardToken = await stakeRewardTokenContract.deploy()
     await StakeRewardToken.deployed()
 
-    // await verifyContract(StakeRewardToken.address);
+    await delay(1000 * 60)
+
+    // await verifyContract(StakeRewardToken.address)
     
     console.log("Contract deployed to address: ", StakeRewardToken.address)
 }
 
 async function verifyContract(_address) {
-    let contructor_arguments = [];
-  
-    verify = await hre.run("verify:verify", {
+    const verify = await hre.run("verify:verify", {
       address: _address,
-      constructorArguments: contructor_arguments,
-    });
-    console.log(`successfuly verified`);
-    return verify;
+      constructorArguments: [],
+    })
+    console.log(`successfuly verified`)
+    return verify
 }
+
+let delay = (time) => new Promise((resolve) => setTimeout(resolve, time))
 
 const runMain = async () => {
     try {

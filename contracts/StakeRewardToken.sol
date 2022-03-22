@@ -12,10 +12,10 @@ contract StakeRewardToken is ERC20, Ownable {
     uint256 _tokensPerEther = 1000;
 
     address[] internal stakeholders;
-    mapping (address => uint256) stakes;
-    mapping (address => uint256) rewards;
+    mapping (address => uint256) internal stakes;
+    mapping (address => uint256) internal rewards;
 
-    constructor() ERC20("StakeRewardToken", "SRT") Ownable() {
+    constructor() ERC20("StakeRewardToken", "SRT") {
         _mint(msg.sender, convertToDecimals(1000));
     }
 
@@ -32,14 +32,24 @@ contract StakeRewardToken is ERC20, Ownable {
         _mint(msg.sender, tokens);
     }
 
-    function stakeToken(uint256 _stake) public returns(bool) {
+    function stakeToken(uint256 _stake) public {
         uint256 stake = convertToDecimals(_stake);
         _transfer(msg.sender, owner(), stake);
         _approve(owner(), msg.sender, stake);
         if (stakes[msg.sender] == 0) {
             addStakeHolder(msg.sender);
         }
-        stakes[msg.sender] += stakes[msg.sender].add(stake);
+        stakes[msg.sender] = stakes[msg.sender].add(stake);
+    }
+
+    function unstakeToken(uint256 _stake) public returns(bool) {
+        uint256 stake = convertToDecimals(_stake);
+        stakes[msg.sender] = stakes[msg.sender].sub(stake);
+        if (stakes[msg.sender] == 0) {
+            removeStakeHolder(msg.sender);
+        }
+        _transfer(owner(), msg.sender, stake);
+        _approve(owner(), msg.sender, stakes[msg.sender]);
         return true;
     }
 
@@ -48,7 +58,7 @@ contract StakeRewardToken is ERC20, Ownable {
     }
 
 
-    function isStakeHolder(address _stakeholder) public view onlyOwner returns(bool, uint256) { 
+    function isStakeHolder(address _stakeholder) public view returns(bool, uint256) { 
         for (uint256 i = 0; i < stakeholders.length; i++) {
             if (_stakeholder == stakeholders[i]) return (true, i);
         }

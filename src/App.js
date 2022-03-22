@@ -1,7 +1,7 @@
 import twitterLogo from './assets/twitter-logo.svg';
 import './App.css';
 
-import contractJson from "./abi.json"
+import contractJson from "./artifacts/contracts/StakeRewardToken.sol/StakeRewardToken.json"
 
 import React, { useEffect, useState } from "react"
 
@@ -15,7 +15,7 @@ var bigInt = require("big-integer");
 const TWITTER_HANDLE = 'kingholyhill';
 const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
 
-const CONTRACT_ADDRESS = "0xCC98c007501c415384974c4df92F1ba8498e29f0"
+const CONTRACT_ADDRESS = "0x5C682763bB4f39e22E45587D7bF337215a37D874"
 
 const TOKEN_SYMBOL = "SRT"
 
@@ -27,7 +27,9 @@ const App = () => {
   const [tokenBalance, setTokenBalance] = useState(0)
   const [stakedToken, setStakedToken] = useState(0)
   const [totalStakedTokens, setTotalStakedTokens] = useState(0)
+  const [rewardedToken, setRewardedToken] = useState(0)
   const [stakeValue, setStakeValue] = useState('')
+  const [unstakeValue, setUnstakeValue] = useState('')
   const [buyValue, setBuyValue] = useState('')
   const [transferValue, setTransferValue] = useState('')
   const [transferAddress, setTransferAddress] = useState('')
@@ -101,6 +103,7 @@ const App = () => {
     getBalance()
     getStakedToken()
     getTotalStakedTokens()
+    getRewardedToken()
   }
 
   const getRate = async () => {
@@ -137,17 +140,49 @@ const App = () => {
     setTotalStakedTokens(totalStakedTokens)
   }
 
+  const getRewardedToken = async () => {
+    const signer = await getSigner()
+    const address = await signer.getAddress()
+    
+    const reward = await stakeRewardContract.rewardOf(address)
+    const decimals = await stakeRewardContract.decimals()
+
+    const rewardedToken = reward / 10 ** decimals
+    setRewardedToken(rewardedToken)
+  }
+
   const stakeToken = async () => {
     try {
       if (stakeValue > tokenBalance) {
         alert(`You don't have up to ${stakeValue} ${TOKEN_SYMBOL} in your wallet. You can buy more tokens`)
       }
 
+      const staked = await stakeRewardContract.stakeToken(parseInt(stakeValue))
+      staked.wait()
 
-      const options = { gasLimit: 1000000 }
-      const staked = await stakeRewardContract.stakeToken(parseInt(stakeValue), options)
+      console.log(staked)
 
       if (staked === true) {
+        await getStakedToken()
+        await getTotalStakedTokens()
+      }
+    } catch(error) {
+      console.error(error)
+    }
+  }
+
+  const unstakeToken = async () => {
+    try {
+      if (unstakeValue > stakedToken) {
+        alert(`You don't have up to ${unstakeValue} ${TOKEN_SYMBOL} staked on the platform.`)
+      }
+
+      const unstaked = await stakeRewardContract.unstakeToken(parseInt(unstakeValue))
+      unstaked.wait()
+
+      console.log(unstaked)
+
+      if (unstaked === true) {
         await getStakedToken()
         await getTotalStakedTokens()
       }
@@ -192,11 +227,33 @@ const App = () => {
     }
   }
 
+  const claimReward = async () => {
+    try {
+      if (rewardedToken == 0) {
+        alert(`You don't have any ${TOKEN_SYMBOL} rewarded yet. Stake your tokens for weekly rewards`)
+      }
+
+      const reward = await stakeRewardContract.claimReward()
+      reward.wait()
+
+      console.log(reward)
+
+      if (reward === true) {
+        await getRewardedToken()
+        await getBalance()
+      }
+    } catch(error) {
+      console.error(error)
+    }
+  }
+
   const onInputChange = (event, type) => {
     const { value } = event.target
     
     if (type === "stake") {
       setStakeValue(value)
+    } else if (type === 'unstake') {
+      setUnstakeValue(value)
     } else if (type === "buy") {
       setBuyValue(value)
     } else if (type === "transfer") {
@@ -224,12 +281,22 @@ const App = () => {
         <div>
           <p>Total tokens staked on the platform: {totalStakedTokens} {TOKEN_SYMBOL}</p>
         </div>
+        <div>
+          <p>Rewarded Tokens: {rewardedToken} {TOKEN_SYMBOL}</p>
+        </div>
         <form onSubmit={(event) => {
           event.preventDefault()
           stakeToken()
         }}>
           <input type="text" placeholder="Tokens" value={stakeValue} onChange={ (event) => onInputChange(event, "stake") } />
           <button type="submit" className="form-button submit-button">Stake</button>
+        </form>
+        <form onSubmit={(event) => {
+          event.preventDefault()
+          unstakeToken()
+        }}>
+          <input type="text" placeholder="Tokens" value={unstakeValue} onChange={ (event) => onInputChange(event, "unstake") } />
+          <button type="submit" className="form-button submit-button">Unstake</button>
         </form>
         <form onSubmit={(event) => {
           event.preventDefault()
@@ -247,6 +314,7 @@ const App = () => {
           <input type="text" placeholder="Address" value={transferAddress} onChange={ (event) => onInputChange(event, "address") } />
           <button type="submit" className="form-button submit-button">Transfer</button>
         </form>
+        <button className='form-button submit-button' onClick={claimReward}>Claim Rewards</button>
       </div>
     )
   }
