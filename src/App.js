@@ -229,7 +229,7 @@ const App = () => {
 
   const claimReward = async () => {
     try {
-      if (rewardedToken == 0) {
+      if (rewardedToken === 0) {
         alert(`You don't have any ${TOKEN_SYMBOL} rewarded yet. Stake your tokens for weekly rewards`)
       }
 
